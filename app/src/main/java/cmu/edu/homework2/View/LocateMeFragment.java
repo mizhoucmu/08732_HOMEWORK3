@@ -97,13 +97,6 @@ public class LocateMeFragment extends SupportMapFragment implements GoogleMap.On
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        Log.i(TAG, "onStart");
-
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG,"onCreate");
@@ -111,16 +104,14 @@ public class LocateMeFragment extends SupportMapFragment implements GoogleMap.On
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+//        setUpMapIfNeeded();
     }
-
-
-
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = super.onCreateView(inflater, container, savedInstanceState);
         Log.i(TAG,"onCreateView");
+//        setUpMapIfNeeded();
         return view;
     }
 
@@ -152,12 +143,6 @@ public class LocateMeFragment extends SupportMapFragment implements GoogleMap.On
         stopUpdatingMap();
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.i(TAG, "onDestroy");
-    }
-
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -168,7 +153,6 @@ public class LocateMeFragment extends SupportMapFragment implements GoogleMap.On
 
     @Override
     public void onAttach(Activity activity) {
-        Log.i(TAG,"onAttach");
         super.onAttach(activity);
         try {
             mListener = (OnFragmentInteractionListener) activity;
@@ -180,7 +164,6 @@ public class LocateMeFragment extends SupportMapFragment implements GoogleMap.On
 
     @Override
     public void onDetach() {
-        Log.i(TAG,"onDetach");
         super.onDetach();
         mListener = null;
     }
@@ -188,7 +171,7 @@ public class LocateMeFragment extends SupportMapFragment implements GoogleMap.On
 
     @Override
     public void onLocationChanged(Location location) {
-//        Log.i(TAG,"onLocationChanged");
+        Log.i(TAG,"onLocationChanged");
         if (googleMap != null && mLocationClient != null && mLocationClient.isConnected()) {
             double latitude = location.getLatitude();
             double longitude = location.getLongitude();
@@ -202,7 +185,7 @@ public class LocateMeFragment extends SupportMapFragment implements GoogleMap.On
                 marker = googleMap.addMarker(new MarkerOptions().position(new LatLng(lat,lng)));
                 doReverseGeocoding(location);
             }
-//            Log.i(TAG, "[" + String.valueOf(latitude) + "," + String.valueOf(longitude) + "]:" + markerString);
+            Log.i(TAG, "[" + String.valueOf(latitude) + "," + String.valueOf(longitude) + "]:" + markerString);
 
         }
 
