@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">homework2</string>
+
+    <string name="title_section1">Sensors</string>
+    <string name="title_section2">Locate Me</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_sensor">SensorActivity</string>
+    <string name="title_section3">Section 3</string>
+
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
