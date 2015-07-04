@@ -33,7 +33,13 @@ public class TakePictureNPreview extends Activity implements SurfaceHolder.Callb
         mPreview.getHolder().addCallback(this);
         mPreview.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
-        mCamera = Camera.open();
+        try {
+            mCamera = Camera.open();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override

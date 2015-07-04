@@ -3,6 +3,8 @@ package cmu.edu.homework3.Fragment;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -15,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -61,6 +64,14 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
 
 
     private void setupListView() {
+        String path = getStoragePath();
+        MediaScannerConnection.scanFile(getActivity(), new String[]{path}, null, new MediaScannerConnection.OnScanCompletedListener() {
+            public void onScanCompleted(String path, Uri uri) {
+                Log.i(TAG, "Scan completed");
+                Log.i(TAG, "Scanned " + path + ":");
+                Log.i(TAG, "-> uri=" + uri);
+            }
+        });
         listView = (ListView) view.findViewById(R.id.listview);
         simpleAdapter = new SimpleAdapter(getActivity(), getData(), R.layout.gallery_item, new String[]{"pic", "des"}, new int[]{R.id.pic, R.id.describe});
         listView.setOnItemClickListener(this);
@@ -298,4 +309,35 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
         }
 
     }
+
+    private String getStoragePath() {
+        final String[] projection = {MediaStore.Images.Media._ID,
+                MediaStore.Images.Media.DATA};
+
+        Cursor cursor = getActivity().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                projection, // Which columns to return
+                null,       // Return all rows
+                null,
+                null);
+        StringBuilder result = new StringBuilder();
+        if (cursor != null) {
+            while (result.length() == 0 && cursor.moveToNext()) {
+                String image_path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                image_path = image_path.trim();
+                int dotpos = image_path.indexOf(".");
+                String[] dirs = image_path.split(File.separator);
+                for (int i = 1; i < dirs.length - 1; i++) {
+                    result.append(File.separator);
+                    result.append(dirs[i]);
+                }
+            }
+            cursor.close();
+        }
+        if (result.length() == 0) {
+            return null;
+        } else {
+            return result.toString();
+        }
+    }
+
 }

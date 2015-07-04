@@ -19,8 +19,18 @@
 
     <string name="description">Homework3</string>
 
-    <string name="picture">Picture</string>
-    <string name="description_info">Info</string>
     <string name="btnCapture">capture</string>
+    <string name="title_activity_record">RecordActivity</string>
+    <string name="title_activity_media_recorder">MediaRecorderActivity</string>
+    <string name="menuitem_camera"> Camera </string>
+    <string name="menuitem_media_record"> Media Record </string>
+    <string name="record">Record</string>
+    <string name="stop">Stop</string>
+    <string name="title_activity_camera">CameraActivity</string>
+    <string name="picture">Picture</string>
+    <string name="noCamera">Your device does not support camera</string>
+    <string name="frontonly">Your device has front camera</string>
+    <string name="description_info">Info</string>
+
 
 </resources>
