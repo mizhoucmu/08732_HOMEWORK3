@@ -1,6 +1,5 @@
-package cmu.edu.homework2;
+package cmu.edu.homework3;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -16,11 +15,11 @@ import android.view.ViewGroup;
 
 import java.util.Locale;
 
-import cmu.edu.homework2.View.LocateMeFragment;
-import cmu.edu.homework2.View.SensorFragment;
+import cmu.edu.homework3.Fragment.GalleryFragment;
+import cmu.edu.homework3.Fragment.RecordFragment;
 
 
-public class MainActivity extends ActionBarActivity implements ActionBar.TabListener,cmu.edu.homework2.View.SensorFragment.OnFragmentInteractionListener, cmu.edu.homework2.View.LocateMeFragment.OnFragmentInteractionListener{
+public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -44,8 +43,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
-
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -73,9 +70,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                             .setTabListener(this));
         }
     }
-
-
-
 
 
     @Override
@@ -113,11 +107,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     }
 
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-
-    }
-
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -135,9 +124,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             // Return a PlaceholderFragment (defined as a static inner class below).
             switch (position) {
                 case 0:
-                    return new SensorFragment();
+                    return new GalleryFragment();
                 case 1:
-                    return new LocateMeFragment();
+                    return new RecordFragment();
                 default:
                     break;
             }
@@ -195,6 +184,4 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             return rootView;
         }
     }
-
-
 }

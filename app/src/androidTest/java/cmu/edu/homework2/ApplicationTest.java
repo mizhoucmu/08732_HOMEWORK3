@@ -1,4 +1,4 @@
-package cmu.edu.homework2;
+package cmu.edu.homework3;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

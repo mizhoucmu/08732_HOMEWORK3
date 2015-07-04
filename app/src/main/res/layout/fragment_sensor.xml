@@ -5,7 +5,7 @@
     android:paddingTop="10dp"
     android:paddingLeft="10dp"
 
-    tools:context="cmu.edu.homework2.View.SensorFragment">
+    tools:context="cmu.edu.homework3.View.SensorFragment">
     <LinearLayout
         android:orientation="vertical"
 
