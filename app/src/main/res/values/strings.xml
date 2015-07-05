@@ -31,6 +31,7 @@
     <string name="noCamera">Your device does not support camera</string>
     <string name="frontonly">Your device has front camera</string>
     <string name="description_info">Info</string>
+    <string name="title_activity_save_picture">SavePicture</string>
 
 
 </resources>

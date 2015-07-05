@@ -3,9 +3,12 @@ package cmu.edu.homework3.Fragment;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -18,6 +21,9 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -43,10 +49,12 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
     private final String TAG = "----------";
     private ListView listView;
     private SimpleAdapter simpleAdapter;
-    private View view;
+    private View view = null;
     private List<HashMap<String, Object>> dataList = new ArrayList<HashMap<String, Object>>();
     private HashMap<String, Image> images = new HashMap<String, Image>();
     private HashMap<String, Video> videos = new HashMap<String, Video>();
+    public static int MEDIA_TYPE_IMAGE = 1;
+    public static int MEDIA_TYPE_VIDEO = 2;
 
 
     @Override
@@ -64,14 +72,8 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
 
 
     private void setupListView() {
-        String path = getStoragePath();
-        MediaScannerConnection.scanFile(getActivity(), new String[]{path}, null, new MediaScannerConnection.OnScanCompletedListener() {
-            public void onScanCompleted(String path, Uri uri) {
-                Log.i(TAG, "Scan completed");
-                Log.i(TAG, "Scanned " + path + ":");
-                Log.i(TAG, "-> uri=" + uri);
-            }
-        });
+        rescanMedia();
+        dataList.clear();
         listView = (ListView) view.findViewById(R.id.listview);
         simpleAdapter = new SimpleAdapter(getActivity(), getData(), R.layout.gallery_item, new String[]{"pic", "des"}, new int[]{R.id.pic, R.id.describe});
         listView.setOnItemClickListener(this);
@@ -80,13 +82,16 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
 
     private List<HashMap<String, Object>> getData() {
         prepareImageInfo();
-        prepareImgThumbnailsInfo();
         for (String id : images.keySet()) {
             Image img = images.get(id);
             Log.i(TAG, "id " + img.getImage_id() + "  Thumbnails: " + img.getThumbnail_path());
             HashMap<String, Object> map = new HashMap<String, Object>();
             Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(getActivity().getContentResolver(), Long.parseLong(id), MediaStore.Images.Thumbnails.MICRO_KIND, null);
-//            map.put("pic", bitmap);
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+
+            int new_width = width * 100 / Math.max(width, height);
+            int new_height = height * 100 / Math.max(width, height);
             map.put("pic", img.getThumbnail_path());
             String takenTime = usingDateFormatterWithTimeZone(images.get(id).getTime());
             Log.i(TAG, takenTime);
@@ -96,7 +101,6 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
             dataList.add(map);
         }
 
-        prepareVideoThumbnailsInfo();
         prepareVideoInfo();
         for (String id : videos.keySet()) {
             Video video = videos.get(id);
@@ -139,16 +143,18 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
                 String time = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATE_TAKEN));
 
                 if (videos.containsKey(id)) {
-                    videos.get(id).setPath(path);
-                    videos.get(id).setTime(time);
-                    videos.get(id).setTitle(title);
-
+                    Video video = videos.get(id);
+                    video.setPath(path);
+                    video.setTime(time);
+                    video.setTitle(title);
+                    video.setThumbnail_path(saveThumbnail(video.getPath()));
                 } else {
                     Video video = new Video();
                     video.setId(id);
                     video.setPath(path);
                     video.setTitle(title);
                     video.setTime(time);
+                    video.setThumbnail_path(saveThumbnail(video.getPath()));
                     videos.put(id, video);
                 }
                 Log.i(TAG, "Video: id " + id + ", date taken: " + time);
@@ -173,72 +179,6 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
     }
 
 
-    private void prepareImgThumbnailsInfo() {
-        Log.i(TAG, "prepareImgThumbnailsInfo");
-        final String[] projection = {MediaStore.Images.Thumbnails.IMAGE_ID,
-                MediaStore.Images.Thumbnails.DATA,
-        };
-
-        Cursor cursor = getActivity().getContentResolver().query(MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI,
-                projection, // Which columns to return
-                null,       // Return all rows
-                null,
-                null);
-
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                String id = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Thumbnails.IMAGE_ID));
-                String thumbnail_path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Thumbnails.DATA));
-
-                if (images.containsKey(id)) {
-                    images.get(id).setThumbnail_path(thumbnail_path);
-                } else {
-                    Image img = new Image();
-                    img.setImage_id(id);
-                    img.setThumbnail_path(thumbnail_path);
-                    images.put(id, img);
-                }
-                Log.i(TAG, "Image: id " + id + ", thumbnail_path : " + thumbnail_path);
-
-            }
-            cursor.close();
-        }
-
-    }
-
-    private void prepareVideoThumbnailsInfo() {
-        Log.i(TAG, "prepareVideoThumbnailsInfo");
-        final String[] projection = {MediaStore.Video.Thumbnails.VIDEO_ID,
-                MediaStore.Video.Thumbnails.DATA,
-        };
-
-        Cursor cursor = getActivity().getContentResolver().query(MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI,
-                projection, // Which columns to return
-                null,       // Return all rows
-                null,
-                null);
-
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                String id = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Thumbnails.VIDEO_ID));
-                String thumbnail_path = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Thumbnails.DATA));
-
-                if (videos.containsKey(id)) {
-                    videos.get(id).setThumbnail_path(thumbnail_path);
-                } else {
-                    Video video = new Video();
-                    video.setId(id);
-                    video.setThumbnail_path(thumbnail_path);
-                    videos.put(id, video);
-                }
-                Log.i(TAG, "Video: id " + id + ", Video thumbnail_path : " + thumbnail_path);
-
-            }
-            cursor.close();
-        }
-
-    }
-
     private void prepareImageInfo() {
         final String[] projection = {MediaStore.Images.Media._ID,
                 MediaStore.Images.Media.DATA,
@@ -255,24 +195,27 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
             while (cursor.moveToNext()) {
                 String id = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media._ID));
                 String image_path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-                String image_title = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.TITLE));
-                String date = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN));
+                if (getFileType(image_path).equals("jpg")) {
+                    Log.d(TAG,"Going to process JPG: " + image_path);
+                    String image_title = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.TITLE));
+                    String date = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN));
+                    if (images.containsKey(id)) {
+                        images.get(id).setImage_path(image_path);
+                        images.get(id).setTime(date);
+                        images.get(id).setTitle(image_title);
+                        images.get(id).setThumbnail_path(saveThumbnail(image_path));
 
-                if (images.containsKey(id)) {
-                    images.get(id).setImage_path(image_path);
-                    images.get(id).setTime(date);
-                    images.get(id).setTitle(image_title);
-
-                } else {
-                    Image img = new Image();
-                    img.setImage_id(id);
-                    img.setImage_path(image_path);
-                    img.setTitle(image_title);
-                    img.setTime(date);
-                    images.put(id, img);
+                    } else {
+                        Image img = new Image();
+                        img.setImage_id(id);
+                        img.setImage_path(image_path);
+                        img.setTitle(image_title);
+                        img.setTime(date);
+                        img.setThumbnail_path(saveThumbnail(image_path));
+                        images.put(id, img);
+                    }
+                    Log.i(TAG, "Image: id " + id + ", image path: " + image_path);
                 }
-                Log.i(TAG, "Image: id " + id + ", image path: " + image_path);
-
             }
             cursor.close();
         }
@@ -290,19 +233,19 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
         switch (suffix) {
             case "jpg": {
                 Intent it = new Intent(getActivity(), OpenPicture.class);
-                it.putExtra("path",path);
+                it.putExtra("path", path);
                 startActivity(it);
                 break;
             }
             case "png": {
                 Intent it = new Intent(getActivity(), OpenPicture.class);
-                it.putExtra("path",path);
+                it.putExtra("path", path);
                 startActivity(it);
                 break;
             }
             case "mp4": {
                 Intent it = new Intent(getActivity(), cmu.edu.homework3.View.VideoPlayerActivity.class);
-                it.putExtra("path",path);
+                it.putExtra("path", path);
                 startActivity(it);
                 break;
             }
@@ -340,4 +283,141 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
         }
     }
 
+    private void rescanMedia() {
+        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        Log.d(TAG, "Path of rescan: " + path.getAbsolutePath());
+        MediaScannerConnection.scanFile(getActivity(), new String[]{path.getAbsolutePath()}, null, new MediaScannerConnection.OnScanCompletedListener() {
+            public void onScanCompleted(String path, Uri uri) {
+                Log.i(TAG, "Scan completed");
+                Log.i(TAG, "path:" + path);
+                Log.i(TAG, "URI" + uri);
+            }
+        });
+    }
+
+    public void setMenuVisibility(final boolean visible) {
+        if (view != null) {
+            super.setMenuVisibility(visible);
+            setupListView();
+        }
+    }
+
+
+    private String getFileType(String file_path) {
+        if (file_path == null) {
+            return null;
+        }
+        int dotpos = file_path.indexOf(".");
+        String type = file_path.substring(dotpos + 1);
+        return type;
+    }
+
+    private String saveThumbnail(String file_path) {
+        int dotpos = file_path.indexOf(".");
+        String type = file_path.substring(dotpos + 1);
+        Log.d(TAG, "Type:" + type);
+        String thumbnail_path = getThumbnailPath(file_path);
+        Log.d(TAG, "thumbnail_path: " + thumbnail_path);
+        switch (type) {
+            case "jpg": {
+                File imgFile = new File(file_path);
+                Bitmap bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                File thumbnail = new File(thumbnail_path);
+                if (thumbnail == null) {
+                    Log.d(TAG,"thumbnail == null");
+                }
+                if (!thumbnail.exists()) {
+                    try {
+                        Log.d(TAG, "Creating new file: " + thumbnail_path);
+                        FileOutputStream fos = new FileOutputStream(thumbnail);
+                        int original_width = bitmap.getWidth();
+                        int original_height = bitmap.getHeight();
+                        int max_side = Math.max(original_height, original_width);
+                        int new_width = original_width * 300 / max_side;
+                        int new_height = original_height * 300 / max_side;
+                        Bitmap.createScaledBitmap(bitmap, new_width, new_height, false).compress(Bitmap.CompressFormat.PNG, 100, fos);
+                        fos.close();
+                        Log.d("Thumbnail saved to ", "Path:" + thumbnail_path);
+                    } catch (FileNotFoundException e) {
+                        Log.d("PictureSave", "File not found: " + e.getMessage());
+                    } catch (IOException e) {
+                        Log.d("PictureSave", "Error accessing file: " + e.getMessage());
+                    }
+                }
+
+                break;
+            }
+            case "mp4": {
+                Log.d(TAG, "Going to generate thumbnail for mp4 file" + file_path);
+                File videoFile = new File(file_path);
+                Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(file_path, MediaStore.Video.Thumbnails.MINI_KIND);
+                Log.d(TAG, "bitmap of video: w " + bitmap.getWidth() + ", h " + bitmap.getHeight());
+                File thumbnail = new File(thumbnail_path);
+                if (!thumbnail.exists()) {
+                    Log.d(TAG, "thumbnail doesn't exist");
+                    try {
+                        Log.d(TAG, "Creating new file: " + thumbnail_path);
+                        FileOutputStream fos = new FileOutputStream(thumbnail_path);
+                        int original_width = bitmap.getWidth();
+                        int original_height = bitmap.getHeight();
+                        int max_side = Math.max(original_height, original_width);
+                        Log.d(TAG, "max_side:" + max_side);
+                        if (max_side > 300) {
+                            Log.d(TAG, "max_side > 300");
+                            int new_width = original_width * 300 / max_side;
+                            int new_height = original_height * 300 / max_side;
+                            Bitmap thumbnail_bitmap = Bitmap.createScaledBitmap(bitmap, new_width, new_height, false);
+                            thumbnail_bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                            fos.close();
+                            Log.d(TAG, "Thumbnail saved to " + "Path:" + thumbnail_path);
+                        } else {
+                            Log.d(TAG, "max_side <= 300");
+                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                            fos.close();
+                            Log.d(TAG, "Thumbnail saved to " + "Path:" + thumbnail_path);
+                        }
+
+                    } catch (FileNotFoundException e) {
+                        Log.d("PictureSave", "File not found: " + e.getMessage());
+                    } catch (IOException e) {
+                        Log.d("PictureSave", "Error accessing file: " + e.getMessage());
+                    }
+                }
+                break;
+            }
+        }
+        return thumbnail_path;
+    }
+
+    private static String getThumbnailPath(String path) {
+        Log.d("----------", "getThumbnailPath from " + path);
+
+
+
+        String[] dirs = path.split("/");
+        StringBuilder res = new StringBuilder();
+        for (int i = 1; i < dirs.length - 2; i++) {
+            res.append(File.separator);
+            res.append(dirs[i]);
+        }
+        res.append(File.separator);
+        res.append("thumbnail");
+
+        File thumbDir = new File(res.toString());
+        if (!thumbDir.exists()) {
+            if (!thumbDir.mkdirs()) {
+                Log.d("--------", "failed to create directory");
+                return null;
+            }
+        }
+
+        res.append(File.separator);
+        res.append(dirs[dirs.length - 1]);
+
+        String result = res.toString();
+        int dotpos = result.indexOf(".");
+        String finalresult = result.substring(0, dotpos) + ".png";
+        Log.d("----------", "getThumbnailPath to " + finalresult);
+        return finalresult;
+    }
 }
