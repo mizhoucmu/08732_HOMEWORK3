@@ -51,6 +51,7 @@ public class RecordFragment extends Fragment {
                     Log.e(TAG, "camera not availabe");
                 }
             }
+
         });
         return view;
     }

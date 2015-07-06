@@ -171,11 +171,12 @@ public class SavePicture extends ActionBarActivity {
         String andrewID = "mizhou";
         String deviceName = MyDevice.getDeviceName();
         String myVersion = android.os.Build.VERSION.RELEASE; // e.g. myVersion := "1.6"
+        int sdkVersion = android.os.Build.VERSION.SDK_INT;
         Date now = new Date();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         df.setTimeZone(TimeZone.getTimeZone("EST"));
         String timeStamp = df.format(now) + " EST";
-        Log.d(TAG, andrewID + ":" + deviceName + " " + myVersion + " : " + timeStamp);
+        Log.d(TAG, andrewID + " : " + deviceName + " " + myVersion + " API " + sdkVersion + " : " + timeStamp);
     }
 
 }
