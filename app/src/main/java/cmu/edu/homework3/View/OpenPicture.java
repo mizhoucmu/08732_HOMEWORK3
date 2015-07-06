@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ImageView;
 
 import java.io.File;
@@ -21,12 +20,11 @@ public class OpenPicture extends Activity {
         ImageView imgview = (ImageView) findViewById(R.id.OpenImage);
 
         String img_path = (String) getIntent().getExtras().get("path");
-        Log.d("TAG", "img_path: " + img_path);
+
 
         File imgFile = new File(img_path);
         if (imgFile.exists()) {
             Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-            Log.d(TAG,"Bitmap width: " + myBitmap.getWidth() + " , height: " + myBitmap.getHeight());
             imgview.setImageBitmap(myBitmap);
         }
 

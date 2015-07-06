@@ -46,7 +46,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     public void surfaceDestroyed(SurfaceHolder holder) {
         // empty. Take care of releasing the Camera preview in your activity.
-        Log.d("--------", "surfaceDestroyed");
+//        Log.d("--------", "surfaceDestroyed");
         mCamera.release();
     }
 
@@ -131,34 +131,32 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
                 Camera.Size size = getBestPreviewSize();
                 Camera.Size pictureSize = getSmallestPictureSize(parameters);
-                Log.d(TAG,"pictureSize: width " + pictureSize.width + ", height " + pictureSize.height );
+//                Log.d(TAG,"pictureSize: width " + pictureSize.width + ", height " + pictureSize.height );
 
                 Display display = activity.getWindowManager().getDefaultDisplay();
 
                 switch (display.getRotation()) {
                     case Surface.ROTATION_0: // This is display orientation
-                        Log.i(TAG, "Rotation: " + "0");
                         if (size.height > size.width)
                             parameters.setPreviewSize(size.height, size.width);
                         else parameters.setPreviewSize(size.width, size.height);
                         mCamera.setDisplayOrientation(90);
                         break;
                     case Surface.ROTATION_90:
-                        Log.i(TAG, "Rotation: " + "90");
                         if (size.height > size.width)
                             parameters.setPreviewSize(size.height, size.width);
                         else parameters.setPreviewSize(size.width, size.height);
                         mCamera.setDisplayOrientation(0);
                         break;
                     case Surface.ROTATION_180:
-                        Log.i(TAG, "Rotation: " + "180");
+
                         if (size.height > size.width)
                             parameters.setPreviewSize(size.height, size.width);
                         else parameters.setPreviewSize(size.width, size.height);
                         mCamera.setDisplayOrientation(270);
                         break;
                     case Surface.ROTATION_270:
-                        Log.i(TAG, "Rotation: " + "270");
+
                         if (size.height > size.width)
                             parameters.setPreviewSize(size.height, size.width);
                         else parameters.setPreviewSize(size.width, size.height);
@@ -180,7 +178,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         Camera.Size result = null;
         Camera.Parameters p = mCamera.getParameters();
         for (Camera.Size size : p.getSupportedPreviewSizes()) {
-            Log.i(TAG, "getBestPreviewSize: width: " + size.width + ", height:" + size.height);
 
             if (result == null) {
                 result = size;
@@ -201,7 +198,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         Camera.Size result = null;
 
         for (Camera.Size size : parameters.getSupportedPictureSizes()) {
-            Log.d(TAG, "getSmallestPictureSize-getSupportedPictureSizes: w: " + size.width + " h: " + size.height);
+//            Log.d(TAG, "getSmallestPictureSize-getSupportedPictureSizes: w: " + size.width + " h: " + size.height);
             if (result == null) {
                 result = size;
             } else {

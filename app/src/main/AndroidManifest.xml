@@ -32,7 +32,7 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -41,24 +41,33 @@
         </activity>
         <activity
             android:name=".View.OpenPicture"
-            android:screenOrientation="portrait"
-            android:label="@string/app_name" />
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".View.VideoPlayerActivity"
-            android:screenOrientation="portrait"
-            android:label="@string/app_name" />
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".View.TakePictureNPreview"
-            android:screenOrientation="portrait"
-            android:label="@string/app_name" />
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".cameraapi.MyCamera"
-            android:screenOrientation="portrait"
-            android:label="@string/app_name" />
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".View.SavePicture"
-            android:screenOrientation="portrait"
-            android:label="@string/title_activity_save_picture" >
+            android:label="@string/title_activity_save_picture"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name=".video.VideoCapture3"
+            android:label="@string/title_activity_video_capture3"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name=".video.SaveVideo"
+            android:label="@string/title_activity_save_video" >
         </activity>
     </application>
 

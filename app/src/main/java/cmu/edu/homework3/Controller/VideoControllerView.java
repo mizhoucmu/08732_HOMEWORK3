@@ -290,7 +290,7 @@ public class VideoControllerView extends FrameLayout {
         int position = mPlayer.getCurrentPosition();
         int duration = mPlayer.getDuration();
         int left = duration - position;
-        Log.d(TAG,"Position: " + position + ", time left: " + left);
+//        Log.d(TAG,"Position: " + position + ", time left: " + left);
 
         if (mProgress != null) {
             if (duration > 0) {

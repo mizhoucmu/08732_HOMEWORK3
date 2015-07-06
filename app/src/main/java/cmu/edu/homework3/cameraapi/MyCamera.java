@@ -35,7 +35,7 @@ public class MyCamera extends Activity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
-        Log.d(TAG, "onCreate of MyCamera");
+//        Log.d(TAG, "onCreate of MyCamera");
 
         if (!checkCameraHardware(getApplicationContext())) {
             Log.e("Camera", "Not supported");

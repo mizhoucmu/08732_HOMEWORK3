@@ -32,6 +32,10 @@
     <string name="frontonly">Your device has front camera</string>
     <string name="description_info">Info</string>
     <string name="title_activity_save_picture">SavePicture</string>
+    <string name="title_activity_video_capture">VideoCapture</string>
+    <string name="title_activity_take_video2">TakeVideo2</string>
+    <string name="title_activity_video_capture3">VideoCapture3</string>
+    <string name="title_activity_save_video">SaveVideo</string>
 
 
 </resources>

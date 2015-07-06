@@ -3,7 +3,6 @@ package cmu.edu.homework3.View;
 import android.app.Activity;
 import android.hardware.Camera;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -52,7 +51,6 @@ public class TakePictureNPreview extends Activity implements SurfaceHolder.Callb
     public void onDestroy() {
         super.onDestroy();
         mCamera.release();
-        Log.d("CAMERA","Destroy");
     }
 
     public void onCancelClick(View v) {
@@ -106,6 +104,6 @@ public class TakePictureNPreview extends Activity implements SurfaceHolder.Callb
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.i("PREVIEW", "surfaceDestroyed");
+//        Log.i("PREVIEW", "surfaceDestroyed");
     }
 }

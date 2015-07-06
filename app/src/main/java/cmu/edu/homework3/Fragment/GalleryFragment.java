@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -50,7 +52,7 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
     private ListView listView;
     private SimpleAdapter simpleAdapter;
     private View view = null;
-    private List<HashMap<String, Object>> dataList = new ArrayList<HashMap<String, Object>>();
+    private ArrayList<HashMap<String, Object>> dataList = new ArrayList<HashMap<String, Object>>();
     private HashMap<String, Image> images = new HashMap<String, Image>();
     private HashMap<String, Video> videos = new HashMap<String, Video>();
     public static int MEDIA_TYPE_IMAGE = 1;
@@ -84,7 +86,7 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
         prepareImageInfo();
         for (String id : images.keySet()) {
             Image img = images.get(id);
-            Log.i(TAG, "id " + img.getImage_id() + "  Thumbnails: " + img.getThumbnail_path());
+
             HashMap<String, Object> map = new HashMap<String, Object>();
             Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(getActivity().getContentResolver(), Long.parseLong(id), MediaStore.Images.Thumbnails.MICRO_KIND, null);
             int width = bitmap.getWidth();
@@ -94,10 +96,10 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
             int new_height = height * 100 / Math.max(width, height);
             map.put("pic", img.getThumbnail_path());
             String takenTime = usingDateFormatterWithTimeZone(images.get(id).getTime());
-            Log.i(TAG, takenTime);
             map.put("des", takenTime);
             map.put("id", id);
             map.put("path", img.getImage_path());
+            map.put("time", img.getTime());
             dataList.add(map);
         }
 
@@ -106,20 +108,34 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
             Video video = videos.get(id);
 
             if (video.getTime() != null) {
-                Log.i(TAG, "id " + video.getId() + ": " + video.getPath());
                 HashMap<String, Object> map = new HashMap<String, Object>();
                 map.put("pic", video.getThumbnail_path());
                 String takenTime = usingDateFormatterWithTimeZone(video.getTime());
-                Log.i(TAG, takenTime);
+
                 map.put("des", takenTime);
                 map.put("id", id);
                 map.put("path", video.getPath());
+                map.put("time", video.getTime());
                 dataList.add(map);
             }
 
 
         }
 
+        Collections.sort(dataList, new Comparator<HashMap<String, Object>>() {
+            @Override
+            public int compare(HashMap<String, Object> lhs, HashMap<String, Object> rhs) {
+                Long time1 = Long.valueOf((String) lhs.get("time"));
+                Long time2 = Long.valueOf((String) rhs.get("time"));
+                if (time1 > time2) {
+                    return -1;
+                } else if (time1 < time2) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        });
         return dataList;
     }
 
@@ -157,7 +173,7 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
                     video.setThumbnail_path(saveThumbnail(video.getPath()));
                     videos.put(id, video);
                 }
-                Log.i(TAG, "Video: id " + id + ", date taken: " + time);
+
 
             }
             cursor.close();
@@ -168,7 +184,7 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
         if (time == null) {
             return null;
         }
-        Log.i(TAG, time);
+
         long input = Long.valueOf(time);
         Date date = new Date(input);
         Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("EST"));
@@ -196,7 +212,6 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
                 String id = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media._ID));
                 String image_path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
                 if (getFileType(image_path).equals("jpg")) {
-                    Log.d(TAG,"Going to process JPG: " + image_path);
                     String image_title = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.TITLE));
                     String date = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN));
                     if (images.containsKey(id)) {
@@ -214,7 +229,7 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
                         img.setThumbnail_path(saveThumbnail(image_path));
                         images.put(id, img);
                     }
-                    Log.i(TAG, "Image: id " + id + ", image path: " + image_path);
+
                 }
             }
             cursor.close();
@@ -223,12 +238,10 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Log.d(TAG, "onItemClick");
-        Log.d(TAG, "Clicking: " + dataList.get(position).get("path"));
         String path = (String) dataList.get(position).get("path");
         int dotpos = path.indexOf('.');
         String suffix = path.substring(dotpos + 1);
-        Log.d(TAG, "suffix: " + suffix);
+
 
         switch (suffix) {
             case "jpg": {
@@ -285,12 +298,11 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
 
     private void rescanMedia() {
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        Log.d(TAG, "Path of rescan: " + path.getAbsolutePath());
         MediaScannerConnection.scanFile(getActivity(), new String[]{path.getAbsolutePath()}, null, new MediaScannerConnection.OnScanCompletedListener() {
             public void onScanCompleted(String path, Uri uri) {
-                Log.i(TAG, "Scan completed");
-                Log.i(TAG, "path:" + path);
-                Log.i(TAG, "URI" + uri);
+//                Log.i(TAG, "Scan completed");
+//                Log.i(TAG, "path:" + path);
+//                Log.i(TAG, "URI" + uri);
             }
         });
     }
@@ -315,20 +327,18 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
     private String saveThumbnail(String file_path) {
         int dotpos = file_path.indexOf(".");
         String type = file_path.substring(dotpos + 1);
-        Log.d(TAG, "Type:" + type);
+
         String thumbnail_path = getThumbnailPath(file_path);
-        Log.d(TAG, "thumbnail_path: " + thumbnail_path);
         switch (type) {
             case "jpg": {
                 File imgFile = new File(file_path);
                 Bitmap bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
                 File thumbnail = new File(thumbnail_path);
                 if (thumbnail == null) {
-                    Log.d(TAG,"thumbnail == null");
+                    Log.e(TAG, "thumbnail == null");
                 }
                 if (!thumbnail.exists()) {
                     try {
-                        Log.d(TAG, "Creating new file: " + thumbnail_path);
                         FileOutputStream fos = new FileOutputStream(thumbnail);
                         int original_width = bitmap.getWidth();
                         int original_height = bitmap.getHeight();
@@ -337,50 +347,47 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
                         int new_height = original_height * 300 / max_side;
                         Bitmap.createScaledBitmap(bitmap, new_width, new_height, false).compress(Bitmap.CompressFormat.PNG, 100, fos);
                         fos.close();
-                        Log.d("Thumbnail saved to ", "Path:" + thumbnail_path);
+
                     } catch (FileNotFoundException e) {
-                        Log.d("PictureSave", "File not found: " + e.getMessage());
+                        Log.e("PictureSave", "File not found: " + e.getMessage());
                     } catch (IOException e) {
-                        Log.d("PictureSave", "Error accessing file: " + e.getMessage());
+                        Log.e("PictureSave", "Error accessing file: " + e.getMessage());
                     }
                 }
 
                 break;
             }
             case "mp4": {
-                Log.d(TAG, "Going to generate thumbnail for mp4 file" + file_path);
                 File videoFile = new File(file_path);
                 Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(file_path, MediaStore.Video.Thumbnails.MINI_KIND);
-                Log.d(TAG, "bitmap of video: w " + bitmap.getWidth() + ", h " + bitmap.getHeight());
                 File thumbnail = new File(thumbnail_path);
                 if (!thumbnail.exists()) {
-                    Log.d(TAG, "thumbnail doesn't exist");
                     try {
-                        Log.d(TAG, "Creating new file: " + thumbnail_path);
+
                         FileOutputStream fos = new FileOutputStream(thumbnail_path);
                         int original_width = bitmap.getWidth();
                         int original_height = bitmap.getHeight();
                         int max_side = Math.max(original_height, original_width);
-                        Log.d(TAG, "max_side:" + max_side);
+
                         if (max_side > 300) {
-                            Log.d(TAG, "max_side > 300");
+
                             int new_width = original_width * 300 / max_side;
                             int new_height = original_height * 300 / max_side;
                             Bitmap thumbnail_bitmap = Bitmap.createScaledBitmap(bitmap, new_width, new_height, false);
                             thumbnail_bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
                             fos.close();
-                            Log.d(TAG, "Thumbnail saved to " + "Path:" + thumbnail_path);
+
                         } else {
-                            Log.d(TAG, "max_side <= 300");
+
                             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
                             fos.close();
-                            Log.d(TAG, "Thumbnail saved to " + "Path:" + thumbnail_path);
+
                         }
 
                     } catch (FileNotFoundException e) {
-                        Log.d("PictureSave", "File not found: " + e.getMessage());
+                        Log.e("PictureSave", "File not found: " + e.getMessage());
                     } catch (IOException e) {
-                        Log.d("PictureSave", "Error accessing file: " + e.getMessage());
+                        Log.e("PictureSave", "Error accessing file: " + e.getMessage());
                     }
                 }
                 break;
@@ -390,9 +397,6 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
     }
 
     private static String getThumbnailPath(String path) {
-        Log.d("----------", "getThumbnailPath from " + path);
-
-
 
         String[] dirs = path.split("/");
         StringBuilder res = new StringBuilder();
@@ -417,7 +421,6 @@ public class GalleryFragment extends Fragment implements AdapterView.OnItemClick
         String result = res.toString();
         int dotpos = result.indexOf(".");
         String finalresult = result.substring(0, dotpos) + ".png";
-        Log.d("----------", "getThumbnailPath to " + finalresult);
         return finalresult;
     }
 }

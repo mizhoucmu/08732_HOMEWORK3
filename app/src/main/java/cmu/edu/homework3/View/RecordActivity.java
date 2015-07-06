@@ -280,7 +280,7 @@ public class RecordActivity extends ActionBarActivity {
         // Create the storage directory if it does not exist
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
-                Log.d(IMAGE_DIRECTORY_NAME, "Oops! Failed create "
+                Log.e(IMAGE_DIRECTORY_NAME, "Oops! Failed create "
                         + IMAGE_DIRECTORY_NAME + " directory");
                 return null;
             }

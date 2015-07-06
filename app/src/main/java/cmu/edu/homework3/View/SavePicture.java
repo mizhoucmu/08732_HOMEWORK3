@@ -24,9 +24,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
+import cmu.edu.homework3.Controller.MyDevice;
+import cmu.edu.homework3.MainActivity;
 import cmu.edu.homework3.R;
-import cmu.edu.homework3.cameraapi.MyCamera;
 
 public class SavePicture extends ActionBarActivity {
     ImageView imgView;
@@ -44,14 +46,13 @@ public class SavePicture extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         context = this;
         setContentView(R.layout.activity_save_picture);
-        imgView = (ImageView)findViewById(R.id.pic_to_save);
+        imgView = (ImageView) findViewById(R.id.pic_to_save);
         showPicture();
-        saveButton = (Button)findViewById(R.id.save_pic);
+        saveButton = (Button) findViewById(R.id.save_pic);
         saveButton.setText("Save");
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Going to save this picture");
                 File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
                 if (pictureFile == null) {
                     Log.e("PictureSave", "Error creating media file, check storage permissions: ");
@@ -61,29 +62,29 @@ public class SavePicture extends ActionBarActivity {
                     FileOutputStream fos = new FileOutputStream(pictureFile);
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
                     fos.close();
+                    printInfo();
                     rescanMedia(pictureFile.getAbsolutePath());
                     Toast.makeText(getApplicationContext(), "Picture taken:" + pictureFile.getAbsolutePath(),
                             Toast.LENGTH_LONG).show();
-                    Log.d("PictureSave", "Path:" + pictureFile.getAbsolutePath());
 
                 } catch (FileNotFoundException e) {
-                    Log.d("PictureSave", "File not found: " + e.getMessage());
+                    Log.e("PictureSave", "File not found: " + e.getMessage());
                 } catch (IOException e) {
-                    Log.d("PictureSave", "Error accessing file: " + e.getMessage());
+                    Log.e("PictureSave", "Error accessing file: " + e.getMessage());
                 }
-                Intent it = new Intent(context, MyCamera.class);
+                Intent it = new Intent(context, MainActivity.class);
                 startActivity(it);
             }
         });
 
-        cancelButton = (Button)findViewById(R.id.cancel_save_pic);
+        cancelButton = (Button) findViewById(R.id.cancel_save_pic);
         cancelButton.setText("Cancel");
-        cancelButton.setOnClickListener(new View.OnClickListener(){
+        cancelButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Going to cancel");
-                Intent it = new Intent(context, MyCamera.class);
+
+                Intent it = new Intent(context, MainActivity.class);
                 startActivity(it);
             }
         });
@@ -115,9 +116,9 @@ public class SavePicture extends ActionBarActivity {
         File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
         MediaScannerConnection.scanFile(context, new String[]{filepath}, null, new MediaScannerConnection.OnScanCompletedListener() {
             public void onScanCompleted(String path, Uri uri) {
-                Log.i(TAG, "Scan completed");
-                Log.i(TAG, "path:" + path);
-                Log.i(TAG, "URI" + uri);
+//                Log.i(TAG, "Scan completed");
+//                Log.i(TAG, "path:" + path);
+//                Log.i(TAG, "URI" + uri);
             }
         });
     }
@@ -135,7 +136,7 @@ public class SavePicture extends ActionBarActivity {
         // Create the storage directory if it does not exist
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
-                Log.d("--------", "failed to create directory");
+                Log.e("--------", "failed to create directory");
                 return null;
             }
         }
@@ -157,14 +158,24 @@ public class SavePicture extends ActionBarActivity {
     }
 
     private void showPicture() {
-        byte[] data = (byte[])getIntent().getExtras().get("data");
+        byte[] data = (byte[]) getIntent().getExtras().get("data");
         bitmap = ImageTools.toBitmap(data);
-        Log.i(TAG,"bitmap width:" + bitmap.getWidth() + ", bitmap height:" + bitmap.getHeight());
-        int rotation = (int)getIntent().getExtras().get("rotation");
+        int rotation = (int) getIntent().getExtras().get("rotation");
         bitmap = ImageTools.rotate(bitmap, rotation);
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
         imgView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, width / 2, height / 2, false));
+    }
+
+    private void printInfo() {
+        String andrewID = "mizhou";
+        String deviceName = MyDevice.getDeviceName();
+        String myVersion = android.os.Build.VERSION.RELEASE; // e.g. myVersion := "1.6"
+        Date now = new Date();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        df.setTimeZone(TimeZone.getTimeZone("EST"));
+        String timeStamp = df.format(now) + " EST";
+        Log.d(TAG, andrewID + ":" + deviceName + " " + myVersion + " : " + timeStamp);
     }
 
 }
@@ -173,6 +184,7 @@ class ImageTools {
     public static Bitmap toBitmap(byte[] data) {
         return BitmapFactory.decodeByteArray(data, 0, data.length);
     }
+
     public static Bitmap rotate(Bitmap in, int angle) {
         Matrix mat = new Matrix();
         mat.postRotate(angle);

@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 
 import cmu.edu.homework3.R;
 import cmu.edu.homework3.cameraapi.MyCamera;
+import cmu.edu.homework3.video.VideoCapture3;
 
 
 /**
@@ -36,7 +37,7 @@ public class RecordFragment extends Fragment {
                     Intent takePic = new Intent(getActivity(), MyCamera.class);
                     startActivity(takePic);
                 } else {
-                    Log.i(TAG, "camera not availabe");
+                    Log.e(TAG, "camera not availabe");
                 }
 
             }
@@ -47,14 +48,13 @@ public class RecordFragment extends Fragment {
             public void onClick(View v) {
                 // detect if camera is available
                 if (getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-                    Intent mediaRecord = new Intent(getActivity(), MyCamera.class);
+                    Intent mediaRecord = new Intent(getActivity(), VideoCapture3.class);
                     startActivity(mediaRecord);
                 } else {
-                    Log.i(TAG, "camera not availabe");
+                    Log.e(TAG, "camera not availabe");
                 }
             }
         });
-
         return view;
     }
 }
