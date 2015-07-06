@@ -1,4 +1,4 @@
-package cmu.edu.homework3.cameraapi;
+package cmu.edu.homework3.CameraAPI;
 
 import android.app.Activity;
 import android.content.Context;

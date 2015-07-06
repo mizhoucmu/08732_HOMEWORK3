@@ -1,4 +1,4 @@
-package cmu.edu.homework3.video;
+package cmu.edu.homework3.Video;
 
 import android.app.Activity;
 import android.content.Context;

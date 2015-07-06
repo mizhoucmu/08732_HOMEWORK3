@@ -52,7 +52,7 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".cameraapi.MyCamera"
+            android:name=".CameraAPI.MyCamera"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
@@ -61,12 +61,12 @@
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name=".video.VideoCapture3"
+            android:name=".Video.VideoCapture3"
             android:label="@string/title_activity_video_capture3"
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name=".video.SaveVideo"
+            android:name=".Video.SaveVideo"
             android:label="@string/title_activity_save_video" >
         </activity>
     </application>
